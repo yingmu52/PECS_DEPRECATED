@@ -2,8 +2,7 @@ package benchmark
 
 // Point represents a coordinates in Cartesian Coordinate System
 type Point struct {
-	x float64
-	y float64
+	X, Y float64
 }
 
 // Square represents a container or a damaged area
