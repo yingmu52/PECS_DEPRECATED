@@ -39,9 +39,3 @@ func (cs Circles) Energy() float64 {
 	}
 	return e
 }
-
-// Objective is objective function
-func (cs Circles) Objective() float64 {
-	s := cs.Container().ToSquare().Width
-	return math.Pow(s, 2) + math.Pow(s, 3)*cs.Energy()
-}

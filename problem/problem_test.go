@@ -38,17 +38,6 @@ func TestRectSquareConvert(t *testing.T) {
 	c1 := s1.ToRectangle()
 	assert.Equal(t, s1.Center, c1.ToSquare().Center)
 }
-
-func TestObjective(t *testing.T) {
-	c1 := Circle{Center{0, 0}, 1}
-	c2 := Circle{Center{2, 0}, 1}
-	c3 := Circle{Center{0, 2}, 1}
-	c4 := Circle{Center{-2, 0}, 1}
-	c5 := Circle{Center{0, -2}, 1}
-	cs := Circles{c1, c2, c3, c4, c5}
-	assert.Equal(t, 6.0*6, cs.Objective())
-}
-
 func TestRandom(t *testing.T) {
 	a := []float64{}
 	b := []float64{}

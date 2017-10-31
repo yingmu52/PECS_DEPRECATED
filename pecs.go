@@ -18,7 +18,7 @@ func showResult(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	circles := solution.SimmulatedAnnealing(6)
+	circles := solution.SimmulatedAnnealing(10)
 	circlesForDisplay := circles.ConvertToCanvas(400)
 	fmt.Println("done")
 	t.Execute(w, circlesForDisplay)
