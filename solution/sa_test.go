@@ -14,7 +14,11 @@ func TestInverseMu(t *testing.T) {
 }
 
 func TestSa(t *testing.T) {
-	circles := problem.UnitSquare().RandCircles(10)
-	results := SimmulatedAnnealing(circles)
-	assert.True(t, circles.Objective() < results.Objective(), "sa error")
+	n := 3
+	circles, _ := problem.RandomUnitCircles(n)
+	results := SimmulatedAnnealing(n)
+	obj := circles.Objective()
+	objGood := results.Objective()
+	t.Log(obj, objGood)
+	assert.True(t, obj >= objGood)
 }

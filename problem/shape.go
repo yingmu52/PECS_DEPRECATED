@@ -3,7 +3,10 @@ package problem
 import (
 	"math"
 	"math/rand"
+	"time"
 )
+
+// In this file, all functions MUST be dimension independent.
 
 // Center ...
 type Center struct {
@@ -20,22 +23,39 @@ type Circle struct {
 	Radius float64
 }
 
-func (c Circle) square() Retangle {
-	return Retangle{
-		c.Center.X - c.Radius,
-		c.Center.X + c.Radius,
-		c.Center.Y - c.Radius,
-		c.Center.Y + c.Radius,
+// ForceInbound force circle to stay inside of retangle
+func (c Circle) ForceInbound(r Retangle) Circle {
+	if c.Center.X < r.left+c.Radius {
+		c.Center.X = r.left + c.Radius
 	}
+	if c.Center.X > r.right-c.Radius {
+		c.Center.X = r.right - c.Radius
+	}
+	if c.Center.Y < r.bottom-c.Radius {
+		c.Center.Y = r.bottom - c.Radius
+	}
+	if c.Center.Y > r.top-c.Radius {
+		c.Center.Y = r.top - c.Radius
+	}
+	return c
 }
 
 // Circles is an array of circle
 type Circles []Circle
 
-func (cs Circles) container() Retangle {
-	rect := cs[0].square()
+// Container finds the retangle that encloses the circles
+func (cs Circles) Container() Retangle {
+	boundary := func(c Circle) Retangle {
+		return Retangle{
+			c.Center.X - c.Radius,
+			c.Center.X + c.Radius,
+			c.Center.Y - c.Radius,
+			c.Center.Y + c.Radius,
+		}
+	}
+	rect := boundary(cs[0])
 	for _, c := range cs {
-		r := c.square()
+		r := boundary(c)
 		if rect.left > r.left {
 			rect.left = r.left
 		}
@@ -52,62 +72,19 @@ func (cs Circles) container() Retangle {
 	return rect
 }
 
-type index struct {
-	i, j int
-}
-
-// Energy measures the overlapping status of circles
-func (cs Circles) Energy() float64 {
-	e := float64(0)
-	n := len(cs)
-	memo := map[index]float64{}
-	for i := 0; i < n; i++ {
-		for j := 0; j < n; j++ {
-			// avoid checking self
-			if i == j {
-				continue
-			}
-			// avoid checking same path twice
-			ind := index{i, j}
-			_, exist := memo[ind]
-			if exist {
-				continue
-			}
-			// calculate energy and cache it to memo
-			c := cs[i]
-			t := cs[j]
-			dist := c.Center.distance(t.Center) - c.Radius - t.Radius
-			if dist > 0 {
-				continue
-			}
-			cache := math.Pow(dist, 2)
-			memo[ind] = cache
-			indReverse := index{j, i}
-			memo[indReverse] = cache
-			e += cache
-		}
-	}
-	return e
-}
-
-// Objective is objective function
-func (cs Circles) Objective() float64 {
-	s := cs.container().toSquare().Width
-	return math.Pow(s, 2) + math.Pow(s, 3)*cs.Energy()
-}
-
 // Square ...
 type Square struct {
 	Center
 	Width float64
 }
 
-// Retangle ...
-type Retangle struct {
-	left, right, bottom, top float64
+// SquareOfWidth creates a square at center (w/2,w/2)
+func SquareOfWidth(w float64) Square {
+	return Square{Center{w / 2, w / 2}, w}
 }
 
-func (s Square) toRectangle() Retangle {
+// ToRectangle gets the retangle information from a square
+func (s Square) ToRectangle() Retangle {
 	return Retangle{
 		s.Center.X - s.Width/2,
 		s.Center.X + s.Width/2,
@@ -116,12 +93,16 @@ func (s Square) toRectangle() Retangle {
 	}
 }
 
-// UnitSquare gives a square at center
-func UnitSquare() Retangle {
-	return Retangle{-0.5, 0.5, -0.5, 0.5}
+// UnitSquare is a bottom-left corner at center
+var UnitSquare = Retangle{0, 1, 0, 1}
+
+// Retangle left, right, bottom top
+type Retangle struct {
+	left, right, bottom, top float64
 }
 
-func (r Retangle) toSquare() Square {
+// ToSquare creates a square from a retangle, expanding +y direction
+func (r Retangle) ToSquare() Square {
 	w := r.right - r.left
 	h := r.top - r.bottom
 	Width := math.Max(w, h)
@@ -131,23 +112,9 @@ func (r Retangle) toSquare() Square {
 	}
 }
 
-// RandCircles spreads n circles in retangle
-func (r Retangle) RandCircles(n int) Circles {
-	cs := Circles{}
-	radius := float64((r.right - r.left) / float64(n))
-	for i := 0; i < n; i++ {
-		randCircle := Circle{
-			Center{
-				randomFloat(r.left+radius, r.right-radius),
-				randomFloat(r.bottom+radius, r.top-radius),
-			},
-			radius,
-		}
-		cs = append(cs, randCircle)
-	}
-	return cs
-}
-
-func randomFloat(min float64, maX float64) float64 {
-	return rand.Float64()*(maX-min) + min
+// RandomFloat creates a randome float64 in (min, maX)
+func RandomFloat(min float64, max float64) float64 {
+	// the default source won't be dynamic random, need to create new source everytime for SA
+	randNewSource := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return randNewSource.Float64()*(max-min) + min
 }

@@ -1,21 +1,25 @@
 package main
 
 import (
-	"PECS/problem"
 	"PECS/solution"
 	"fmt"
+	"log"
+	"net/http"
+	"text/template"
 )
 
 func main() {
-	circles := problem.UnitSquare().RandCircles(10)
-	results := solution.SimmulatedAnnealing(circles)
-	p(circles)
-	p(results)
+	http.HandleFunc("/", showResult)
+	http.ListenAndServe(":8080", nil)
 }
 
-func p(cs problem.Circles) {
-	for _, c := range cs {
-		fmt.Println(c)
+func showResult(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("index.pecs")
+	if err != nil {
+		log.Fatalln(err)
 	}
-	fmt.Println()
+	circles := solution.SimmulatedAnnealing(6)
+	circlesForDisplay := circles.ConvertToCanvas(400)
+	fmt.Println("done")
+	t.Execute(w, circlesForDisplay)
 }

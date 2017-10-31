@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <canvas id="pecs" width="400" height="400" style="border:1px solid #140d0d;">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>  
+  <script>
+    {{range .}}
+    var ctx = document.getElementById("pecs").getContext("2d");
+    ctx.beginPath();
+    ctx.arc({{.Center.X}},{{.Center.Y}},{{.Radius}},0, 2*Math.PI);
+    ctx.stroke();
+    {{end}}
+  </script> 
+</html>
